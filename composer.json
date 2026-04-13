@@ -1,0 +1,56 @@
+{
+    "name": "aubes/http-pool-bundle",
+    "type": "symfony-bundle",
+    "description": "Concurrent HTTP orchestration for Symfony: bounded concurrency, per-host rate limiting, reactive chaining, fire-and-forget.",
+    "keywords": [
+        "http-client",
+        "pool",
+        "concurrency",
+        "multiplexing",
+        "async",
+        "symfony",
+        "bundle",
+        "rate-limiting",
+        "retry",
+        "fan-out"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Aurélian Bes"
+        }
+    ],
+    "homepage": "https://github.com/aubes/http-pool-bundle",
+    "support": {
+        "issues": "https://github.com/aubes/http-pool-bundle/issues",
+        "source": "https://github.com/aubes/http-pool-bundle"
+    },
+    "require": {
+        "php": ">=8.3",
+        "psr/log": "^2.0 | ^3.0",
+        "symfony/config": "^6.4 | ^7.4 | ^8.0",
+        "symfony/dependency-injection": "^6.4 | ^7.4 | ^8.0",
+        "symfony/http-client": "^6.4 | ^7.4 | ^8.0",
+        "symfony/http-kernel": "^6.4 | ^7.4 | ^8.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.0",
+        "phpstan/phpstan": "^2.0",
+        "phpunit/phpunit": "^11.5",
+        "symfony/framework-bundle": "^7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Aubes\\HttpPoolBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Aubes\\HttpPoolBundle\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable"
+}
