@@ -27,7 +27,7 @@ final class HttpPoolBundle extends AbstractBundle
         }
 
         $builder->prependExtensionConfig('twig', [
-            'paths' => [__DIR__ . '/Resources/views' => 'HttpPool'],
+            'paths' => [__DIR__.'/Resources/views' => 'HttpPool'],
         ]);
     }
 
