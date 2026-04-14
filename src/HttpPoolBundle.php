@@ -20,6 +20,17 @@ use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 final class HttpPoolBundle extends AbstractBundle
 {
+    public function prependExtension(ContainerConfigurator $container, ContainerBuilder $builder): void
+    {
+        if (!$builder->hasExtension('twig')) {
+            return;
+        }
+
+        $builder->prependExtensionConfig('twig', [
+            'paths' => [__DIR__ . '/Resources/views' => 'HttpPool'],
+        ]);
+    }
+
     public function configure(DefinitionConfigurator $definition): void
     {
         $definition->rootNode()

@@ -1,0 +1,154 @@
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}
+    {% set has_errors = collector.pools|filter(p => p.has_errors)|length > 0 %}
+    {% set icon %}
+        {{ include('@HttpPool/data_collector/icon.svg') }}
+        <span class="sf-toolbar-value">{{ collector.totalRequests }}</span>
+    {% endset %}
+
+    {% set text %}
+        <div class="sf-toolbar-info-piece">
+            <b>Pools</b>
+            <span class="sf-toolbar-status">{{ collector.poolCount }}</span>
+        </div>
+        <div class="sf-toolbar-info-piece">
+            <b>Requests</b>
+            <span class="sf-toolbar-status">{{ collector.totalRequests }}</span>
+        </div>
+        <div class="sf-toolbar-info-piece">
+            <b>Duration</b>
+            <span>{{ collector.totalDurationMs }} ms</span>
+        </div>
+    {% endset %}
+
+    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { link: profiler_url, status: has_errors ? 'red' : '' }) }}
+{% endblock %}
+
+{% block menu %}
+    <span class="label">
+        <span class="icon">{{ include('@HttpPool/data_collector/icon.svg') }}</span>
+        <strong>HTTP Pool</strong>
+        {% if collector.totalRequests > 0 %}
+            <span class="count">
+                <span>{{ collector.totalRequests }}</span>
+            </span>
+        {% endif %}
+    </span>
+{% endblock %}
+
+{% block panel %}
+    <h2>HTTP Pool</h2>
+
+    {% if collector.poolCount == 0 %}
+        <div class="empty empty-panel">
+            <p>No HTTP pool was used during this request.</p>
+        </div>
+    {% else %}
+        <div class="metrics">
+            <div class="metric-group">
+                <div class="metric">
+                    <span class="value">{{ collector.poolCount }}</span>
+                    <span class="label">Pool{{ collector.poolCount > 1 ? 's' : '' }}</span>
+                </div>
+                <div class="metric">
+                    <span class="value">{{ collector.totalRequests }}</span>
+                    <span class="label">Requests</span>
+                </div>
+                <div class="metric">
+                    <span class="value">{{ collector.totalDurationMs }} ms</span>
+                    <span class="label">Total duration</span>
+                </div>
+            </div>
+        </div>
+
+        <p>
+            Individual request details (timing, headers, body) are available in the
+            <a href="{{ path('_profiler', { token: token, panel: 'http_client' }) }}">HttpClient</a> panel.
+        </p>
+
+        {% for pool in collector.pools %}
+            <h3>Pool #{{ pool.index + 1 }}</h3>
+
+            <div class="metrics">
+                <div class="metric-group">
+                    <div class="metric">
+                        <span class="value">{{ pool.total_requests }}</span>
+                        <span class="label">Requests</span>
+                    </div>
+                    <div class="metric">
+                        <span class="value">{{ pool.fan_out_count }}</span>
+                        <span class="label">Fan-out</span>
+                    </div>
+                    <div class="metric">
+                        <span class="value">{{ pool.dedup_hits }}</span>
+                        <span class="label">Dedup hits</span>
+                    </div>
+                    <div class="metric">
+                        <span class="value">{{ pool.fire_count }}</span>
+                        <span class="label">Fire & forget</span>
+                    </div>
+                    <div class="metric">
+                        <span class="value">{{ pool.flush_duration_ms }} ms</span>
+                        <span class="label">flush() duration</span>
+                    </div>
+                    {% if pool.has_errors %}
+                        <div class="metric">
+                            <span class="value" style="color: var(--color-error)">{{ pool.http_errors + pool.callback_errors }}</span>
+                            <span class="label">Errors ({{ pool.http_errors }} HTTP, {{ pool.callback_errors }} callback)</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Key</th>
+                        <th>Method</th>
+                        <th style="max-width: 400px">URL</th>
+                        <th>Status</th>
+                        <th>Type</th>
+                        <th>Initiator</th>
+                        <th>Info</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for trace in pool.traces %}
+                        <tr>
+                            <td>{{ trace.key ?? '-' }}</td>
+                            <td>{{ trace.method }}</td>
+                            <td style="max-width: 400px; word-break: break-all">{{ trace.url }}</td>
+                            <td>
+                                {% if trace.status_code %}
+                                    <span class="label {{ trace.status_code >= 400 ? 'status-error' : 'status-success' }}">
+                                        {{ trace.status_code }}
+                                    </span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="label status-{{ trace.type == 'fire' ? 'warning' : 'success' }}">
+                                    {{ trace.type }}
+                                </span>
+                            </td>
+                            <td>{{ trace.initiator ?? '-' }}</td>
+                            <td>
+                                {% if trace.error %}
+                                    <span class="label status-error" title="{{ trace.error }}">error</span>
+                                {% endif %}
+                                {% if trace.dedup %}
+                                    <span class="label status-info">dedup</span>
+                                {% endif %}
+                                {% if trace.fan_out %}
+                                    <span class="label status-info">fan-out</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+    {% endif %}
+{% endblock %}
